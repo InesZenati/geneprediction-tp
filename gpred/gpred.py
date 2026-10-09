@@ -189,6 +189,15 @@ def write_genes(fasta_file: Path, sequence: str, probable_genes: List[List[int]]
     except IOError:
         sys.exit("Error cannot open {}".format(fasta_file))
 
+def fill(text: str, width: int = 80) -> str:
+    """Split text with a line return to respect fasta format
+ 
+    :param text: (str) The sequence to split.
+    :param width: (int) Maximum number of characters per line.
+    :return: (str) The text split in lines of width characters.
+    """
+    return os.linesep.join(textwrap.wrap(text, width))
+ 
 
 def reverse_complement(sequence: str) -> str:
     """Get the reverse complement
