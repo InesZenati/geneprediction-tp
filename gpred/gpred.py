@@ -228,16 +228,38 @@ def main() -> None: # pragma: no cover
     # Arguments
     args = get_arguments()
     # Let us do magic in 5' to 3'
+    sequence = read_fasta(args.genome_file)
+    probable_genes = predict_genes(sequence, start_regex, stop_regex, shine_regex,
+                                   args.min_gene_len,
+                                   args.max_shine_dalgarno_distance,
+                                   args.min_gap)
     
     # Don't forget to uncomment !!!
-    # Call these function in the order that you want
+    sequence = read_fasta(args.genome_file)
+    probable_genes = predict_genes(sequence, start_regex, stop_regex, shine_regex,
+                                   args.min_gene_len,
+                                   args.max_shine_dalgarno_distance,
+                                   args.min_gap)
     # We reverse and complement
-    #sequence_rc = reverse_complement(sequence)
+    sequence_rc = reverse_complement(sequence)
+    # Same search on the reverse complement strand (3' -> 5')
+    probable_genes_comp = predict_genes(sequence_rc, start_regex, stop_regex,
+                                        shine_regex, args.min_gene_len,
+                                        args.max_shine_dalgarno_distance,
+                                        args.min_gap)
+    # Positions of the reverse strand genes are converted back to the
+    # 5' -> 3' orientation so that start < stop
+    all_genes = []
+    for gene in probable_genes:
+        all_genes.append([gene[0], gene[1]])
+    for gene in probable_genes_comp:
+        new_start = len(sequence) - gene[1] + 1
+        new_stop = len(sequence) - gene[0] + 1
+        all_genes.append([new_start, new_stop])
+    all_genes.sort()
     # Call to output functions
-    #write_genes_pos(args.predicted_genes_file, probable_genes)
-    #write_genes(args.fasta_file, sequence, probable_genes, sequence_rc, probable_genes_comp)
-
-
-
+    write_genes_pos(args.predicted_genes_file, all_genes)
+    write_genes(args.fasta_file, sequence, probable_genes, sequence_rc, probable_genes_comp)
+ 
 if __name__ == '__main__':
     main()
